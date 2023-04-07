@@ -50,7 +50,6 @@ sol_merge() {
     if [ -z "$1" ]; then echo "Usage: sol_merge <GitHub PR #>"; return -1; fi
 
     SOL_MERGE_OG_BRANCH=$(git_current_branch)
-
     if [ "$SOL_MERGE_OG_BRANCH" = "$SOL_MERGE_MG_BRANCH" ]; then
         echo "You are already on the branch for this PR. Please check out another so that the '-d' flag works correctly.";
         return 1;
