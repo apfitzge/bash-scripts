@@ -1,5 +1,9 @@
 alias git-move-diff='git rev-parse --abbrev-ref HEAD | git show --color-moved-ws=ignore-all-space -w --patch-with-stat  --color-moved'
 
+git_current_commit() {
+    git rev-parse HEAD
+}
+
 git_current_branch() {
     git rev-parse --abbrev-ref HEAD
 }
@@ -26,12 +30,17 @@ git_branch_squash() {
         return -1;
     fi
 
+    GIT_BRANCH_SQUASH_OG_BRANCH=$(git_current_branch)
     GIT_BRANCH_SQUASH_BP=$(git_branch_point $1)
     GIT_BRANCH_SQUASH_DEST=$2
 
-    git checkout -b $GIT_BRANCH_SQUASH_DEST
-    git reset --soft $GIT_BRANCH_SQUASH_BP
-    git commit -m "$3"
+    git checkout -b $GIT_BRANCH_SQUASH_DEST && \
+    git reset --soft $GIT_BRANCH_SQUASH_BP && \
+    git commit -m "$3" && \
+    COMMIT=$(git_current_commit) && \
+    git checkout $GIT_BRANCH_SQUASH_OG_BRANCH && \
+    git branch -D $GIT_BRANCH_SQUASH_DEST && \
+    echo "Squashed commit: $COMMIT"
 }
 
 sol_checks() {
