@@ -35,11 +35,15 @@ git_branch_squash() {
     git commit -m "$3"
 }
 
+sol_checks() {
+    ./cargo nightly clippy --all-targets && \
+    ./cargo nightly fmt --all -- --check
+}
+
 sol_commit() {
     if [ -z "$1" ]; then echo "Usage: sol_commit <MESSAGE>"; return -1; fi
 
-    ./cargo nightly clippy --all-targets && \
-    git commit -am "$1";
+    sol_checks && git commit -am "$1";
 }
 
 sol_merge() {
@@ -58,7 +62,7 @@ sol_merge() {
     git checkout -b "$SOL_MERGE_MG_BRANCH_REBASE" \
     git fetch --all && \
     git rebase upstream/master && \
-    ./cargo nightly clippy --all-targets && \
+    sol_checks && \
     git checkout "$SOL_MERGE_OG_BRANCH" && \
     gh pr checks "$1" && \
     gh pr merge -s -d "$1" && \
