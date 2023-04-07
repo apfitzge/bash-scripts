@@ -15,7 +15,6 @@ git_branch_point() {
 
     GIT_BRANCH_POINT_OG_BRANCH=$1
     GIT_BRANCH_POINT_CURRENT_BRANCH=$(git_current_branch)
-
     diff -u <(git rev-list --first-parent ${GIT_BRANCH_POINT_CURRENT_BRANCH}) \
              <(git rev-list --first-parent ${GIT_BRANCH_POINT_OG_BRANCH}) \
              | sed -ne 's/^ //p' | head -1
@@ -50,7 +49,6 @@ sol_merge() {
     if [ -z "$1" ]; then echo "Usage: sol_merge <GitHub PR #>"; return -1; fi
 
     SOL_MERGE_OG_BRANCH=$(git_current_branch)
-
     if [ "$SOL_MERGE_OG_BRANCH" = "$SOL_MERGE_MG_BRANCH" ]; then
         echo "You are already on the branch for this PR. Please check out another so that the '-d' flag works correctly.";
         return 1;
@@ -60,14 +58,15 @@ sol_merge() {
     SOL_MERGE_MG_BRANCH=$(git_current_branch)
     SOL_MERGE_MG_BRANCH_REBASE="${SOL_MERGE_MG_BRANCH}_rebase"
 
-    git checkout -b "$SOL_MERGE_MG_BRANCH_REBASE" && \
+    git checkout -b "$SOL_MERGE_MG_BRANCH_REBASE"
+
     git fetch --all && \
     git rebase upstream/master --no-gpg-sign && \
     sol_checks && \
     git checkout "$SOL_MERGE_OG_BRANCH" && \
     gh pr checks "$1" && \
-    gh pr merge -sdb "" "$1" && \
-    git branch -D "$SOL_MERGE_MG_BRANCH_REBASE";
+    gh pr merge -sdb "" "$1"
 
+    git branch -D "$SOL_MERGE_MG_BRANCH_REBASE"
     git checkout "$SOL_MERGE_OG_BRANCH" # fall-back in case of failure - switch back to original branch
 }
