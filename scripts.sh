@@ -1,19 +1,23 @@
 alias git-move-diff='git rev-parse --abbrev-ref HEAD | git show --color-moved-ws=ignore-all-space -w --patch-with-stat  --color-moved'
 
+# Get the current commit hash
 git_current_commit() {
     git rev-parse HEAD
 }
 
+# Get the current branch name
 git_current_branch() {
     git rev-parse --abbrev-ref HEAD
 }
 
+# Get the child of a commit on the current branch
 git_commit_child() {
     if [ -z "$1" ]; then echo "Usage: git_commit_child <COMMIT>"; return -1; fi
 
     git rev-list HEAD~$(expr $(git rev-list --ancestry-path $1.. --count) - 1) --max-count=1
 }
 
+# Determine the first common commit between the current branch and the input branch
 git_branch_point() {
     if [ -z "$1" ]; then echo "Usage: git_branch_point <MAIN_BRANCH>"; return -1; fi
 
@@ -24,15 +28,17 @@ git_branch_point() {
              | sed -ne 's/^ //p' | head -1
 }
 
+# Squash all commits on the current branch (from branching point off of the input branch) into a single commit
+# with the provided message.
 git_branch_squash() {
-    if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]; then
-        echo "Usage: git_branch_squash <MAIN_BRANCH> <SQUASH_DESTINATION> <SQUASH_MESSAGE>";
+    if [ -z "$1" ] || [ -z "$3" ]; then
+        echo "Usage: git_branch_squash <MAIN_BRANCH> <SQUASH_MESSAGE>";
         return -1;
     fi
 
     GIT_BRANCH_SQUASH_OG_BRANCH=$(git_current_branch)
     GIT_BRANCH_SQUASH_BP=$(git_branch_point $1)
-    GIT_BRANCH_SQUASH_DEST=$2
+    GIT_BRANCH_SQUASH_DEST="$GIT_BRANCH_SQUASH_OG_BRANCH-squishy-squashy"
 
     git checkout -b $GIT_BRANCH_SQUASH_DEST && \
     git reset --soft $GIT_BRANCH_SQUASH_BP && \
@@ -43,17 +49,20 @@ git_branch_squash() {
     echo "Squashed commit: $COMMIT"
 }
 
+# Solana repository - run clippy and fmt checks
 sol_checks() {
     ./cargo nightly clippy --all-targets && \
     ./cargo nightly fmt --all -- --check
 }
 
+# Solana repository - run checks then commit with message
 sol_commit() {
     if [ -z "$1" ]; then echo "Usage: sol_commit <MESSAGE>"; return -1; fi
 
     sol_checks && git commit -am "$1";
 }
 
+# Solana repository - rebase on master, run checks, then merge the input PR
 sol_merge() {
     if [ -z "$1" ]; then echo "Usage: sol_merge <GitHub PR #>"; return -1; fi
 
