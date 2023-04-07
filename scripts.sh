@@ -21,7 +21,7 @@ git_branch_point() {
 }
 
 git_branch_squash() {
-    if [ -z "$1" || -z "$2" || -z "$3" ]; then
+    if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]; then
         echo "Usage: git_branch_squash <MAIN_BRANCH> <SQUASH_DESTINATION> <SQUASH_MESSAGE>";
         return -1;
     fi
