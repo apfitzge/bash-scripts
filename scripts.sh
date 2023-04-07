@@ -51,7 +51,7 @@ git_branch_squash() {
 
 # Solana repository - run clippy and fmt checks
 sol_checks() {
-    ./cargo nightly clippy --all-targets && \
+    ./cargo nightly clippy --all-targets -- -D warnings && \
     ./cargo nightly fmt --all -- --check
 }
 
