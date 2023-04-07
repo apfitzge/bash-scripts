@@ -66,7 +66,7 @@ sol_merge() {
     sol_checks && \
     git checkout "$SOL_MERGE_OG_BRANCH" && \
     gh pr checks "$1" && \
-    gh pr merge -s -d -b "" "$1" && \
+    gh pr merge -sdb "" "$1" && \
     git branch -D "$SOL_MERGE_MG_BRANCH_REBASE";
 
     git checkout "$SOL_MERGE_OG_BRANCH" # fall-back in case of failure - switch back to original branch
