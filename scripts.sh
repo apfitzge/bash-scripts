@@ -67,17 +67,16 @@ sol_merge() {
     if [ -z "$1" ]; then echo "Usage: sol_merge <GitHub PR #>"; return -1; fi
 
     SOL_MERGE_OG_BRANCH=$(git_current_branch)
+    gh pr checkout "$1" || return 1
+    SOL_MERGE_MG_BRANCH=$(git_current_branch)
+
     if [ "$SOL_MERGE_OG_BRANCH" = "$SOL_MERGE_MG_BRANCH" ]; then
         echo "You are already on the branch for this PR. Please check out another so that the '-d' flag works correctly.";
         return 1;
     fi
 
-    gh pr checkout "$1"
-    SOL_MERGE_MG_BRANCH=$(git_current_branch)
     SOL_MERGE_MG_BRANCH_REBASE="${SOL_MERGE_MG_BRANCH}_rebase"
-
-    git checkout -b "$SOL_MERGE_MG_BRANCH_REBASE"
-
+    git checkout -b "$SOL_MERGE_MG_BRANCH_REBASE" && \
     git fetch --all && \
     git rebase upstream/master --no-gpg-sign && \
     sol_checks && \
