@@ -31,7 +31,7 @@ git_branch_point() {
 # Squash all commits on the current branch (from branching point off of the input branch) into a single commit
 # with the provided message.
 git_branch_squash() {
-    if [ -z "$1" ] || [ -z "$3" ]; then
+    if [ -z "$1" ] || [ -z "$2" ]; then
         echo "Usage: git_branch_squash <MAIN_BRANCH> <SQUASH_MESSAGE>";
         return -1;
     fi
@@ -42,7 +42,7 @@ git_branch_squash() {
 
     git checkout -b $GIT_BRANCH_SQUASH_DEST && \
     git reset --soft $GIT_BRANCH_SQUASH_BP && \
-    git commit -m "$3" && \
+    git commit -m "$2" && \
     COMMIT=$(git_current_commit) && \
     git checkout $GIT_BRANCH_SQUASH_OG_BRANCH && \
     git branch -D $GIT_BRANCH_SQUASH_DEST && \
