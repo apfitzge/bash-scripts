@@ -48,3 +48,17 @@ git_branch_squash() {
     git branch -D $GIT_BRANCH_SQUASH_DEST && \
     echo "Squashed commit: $COMMIT"
 }
+
+# Check if there are diffs
+git_has_diffs() {
+    git diff-index --exit-code --ignore-submodules HEAD || return 1;
+}
+
+git_stash_if_diff() {
+    if ! git_has_diffs; then
+        git stash
+        return 1
+    else
+        return 0
+    fi
+}
