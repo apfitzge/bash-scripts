@@ -16,7 +16,8 @@ sol_merge() {
     if [ -z "$1" ]; then echo "Usage: sol_merge <GitHub PR #>"; return -1; fi
 
     SOL_MERGE_OG_BRANCH=$(git_current_branch)
-    SOL_MERGE_STASHED=$(git_stash_if_diff)
+    git_stash_if_diff
+    local stashed=$?
 
     gh pr checkout "$1" || return 1
     SOL_MERGE_MG_BRANCH=$(git_current_branch)
@@ -38,5 +39,5 @@ sol_merge() {
     git branch -D "$SOL_MERGE_MG_BRANCH_REBASE"
     git checkout "$SOL_MERGE_OG_BRANCH" # fall-back in case of failure - switch back to original branch
 
-    if $SOL_MERGE_STASHED; then git stash pop; fi
+    if [ $stashed -eq 1 ]; then git stash pop; fi
 }
