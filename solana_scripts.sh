@@ -41,3 +41,13 @@ sol_merge() {
 
     if [ $stashed -eq 1 ]; then git stash pop; fi
 }
+
+sol_feature_status() {
+    if [ -z "$1" ]; then echo "Usage: sol_feature_status <Feature ID>"; return -1; fi
+
+    # print header
+    echo "         " "Feature                                      | Status                  | Activation Slot | Description"
+    echo "devnet:  " $(solana -ud feature status $1 | head -n 2 | tail -n 1)
+    echo "testnet: " $(solana -ut feature status $1 | head -n 2 | tail -n 1)
+    echo "mainnet: " $(solana -um feature status $1 | head -n 2 | tail -n 1)
+}
