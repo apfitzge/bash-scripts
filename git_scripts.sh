@@ -62,3 +62,22 @@ git_stash_if_diff() {
         return 0
     fi
 }
+
+git_worktree_setup() {
+    if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]; then
+        echo "Usage: git_worktree_setup <NAME> <REPO> <INITIAL-BRANCH>";
+        return -1;
+    fi
+
+    GIT_WORKTREE_SETUP_NAME=$1
+    GIT_WORKTREE_SETUP_REPO=$2
+    GIT_WORKTREE_SETUP_BRANCH=$3
+
+    mkdir ${GIT_WORKTREE_SETUP_NAME} && \
+    cd ${GIT_WORKTREE_SETUP_NAME} && \
+    git clone --bare ${GIT_WORKTREE_SETUP_REPO} .git && \
+    cd .git && \
+    git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*' && \
+    git worktree add ../worktrees/${GIT_WORKTREE_SETUP_BRANCH} ${GIT_WORKTREE_SETUP_BRANCH} && \
+    cd ../../
+}
