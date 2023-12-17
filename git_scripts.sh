@@ -49,6 +49,12 @@ git_branch_squash() {
     echo "Squashed commit: $COMMIT"
 }
 
+# Check if a branch exists
+git_branch_exists() {
+    if [ -z "$1" ]; then echo "Usage: git_branch_exists <BRANCH>"; return -1; fi
+    git rev-parse --verify --quiet $1 > /dev/null
+}
+
 # Check if there are diffs
 git_has_diffs() {
     git diff-index --exit-code --ignore-submodules HEAD || return 1;
@@ -80,4 +86,43 @@ git_worktree_setup() {
     git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*' && \
     git worktree add ../worktrees/${GIT_WORKTREE_SETUP_BRANCH} ${GIT_WORKTREE_SETUP_BRANCH} && \
     cd ../../
+}
+
+git_worktree_base() {
+    dirname $(git rev-parse --git-common-dir)
+}
+
+# Create a new worktree w/ the provided branch name.
+# Creates the branch if it does not already exist.
+git_worktree_new() {
+    if [ -z "$1" ]; then echo "Usage: git_worktree_new <BRANCH>"; return -1; fi
+
+    GIT_WORKTREE_NEW_BRANCH=$1
+    GIT_WORKTREE_NEW_BASE=$(git_worktree_base)/worktrees
+
+    if git_branch_exists ${GIT_WORKTREE_NEW_BRANCH}; then
+        git worktree add ${GIT_WORKTREE_NEW_BASE}/${GIT_WORKTREE_NEW_BRANCH} ${GIT_WORKTREE_NEW_BRANCH}
+    else
+        git worktree add ${GIT_WORKTREE_NEW_BASE}/${GIT_WORKTREE_NEW_BRANCH} -b ${GIT_WORKTREE_NEW_BRANCH}
+    fi
+}
+
+# Open a new worktree for a PR number.
+gh_pr_worktree() {
+    if [ -z "$1" ]; then echo "Usage: gh_worktree_new <PR_NUMBER>"; return -1; fi
+
+    GH_WORKTREE_NEW_PR=$1
+    GH_WORKTREE_NEW_BASE=$(git_worktree_base)/worktrees
+    temp_branch="temp-branch-$(date +%Y%m%d%H%M%S)"
+
+    git worktree add ${GIT_WORKTREE_NEW_BASE}/${GH_WORKTREE_NEW_PR} -b ${temp_branch}
+
+    if [ $? -eq 0 ]; then
+        cd ${GIT_WORKTREE_NEW_BASE}/${GH_WORKTREE_NEW_PR}
+        gh pr checkout ${GH_WORKTREE_NEW_PR}
+        cd -
+        git branch -D ${temp_branch}
+    else
+        git worktree remove ${GIT_WORKTREE_NEW_BASE}/${GH_WORKTREE_NEW_PR}
+    fi
 }
