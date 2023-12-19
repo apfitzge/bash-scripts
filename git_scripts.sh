@@ -115,14 +115,14 @@ gh_pr_worktree() {
     GH_WORKTREE_NEW_BASE=$(git_worktree_base)/worktrees
     temp_branch="temp-branch-$(date +%Y%m%d%H%M%S)"
 
-    git worktree add ${GIT_WORKTREE_NEW_BASE}/${GH_WORKTREE_NEW_PR} -b ${temp_branch}
+    git worktree add ${GH_WORKTREE_NEW_BASE}/${GH_WORKTREE_NEW_PR} -b ${temp_branch}
 
     if [ $? -eq 0 ]; then
-        cd ${GIT_WORKTREE_NEW_BASE}/${GH_WORKTREE_NEW_PR}
+        cd ${GH_WORKTREE_NEW_BASE}/${GH_WORKTREE_NEW_PR}
         gh pr checkout ${GH_WORKTREE_NEW_PR}
         cd -
         git branch -D ${temp_branch}
     else
-        git worktree remove ${GIT_WORKTREE_NEW_BASE}/${GH_WORKTREE_NEW_PR}
+        git worktree remove ${GH_WORKTREE_NEW_BASE}/${GH_WORKTREE_NEW_PR}
     fi
 }
