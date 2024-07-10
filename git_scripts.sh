@@ -126,3 +126,15 @@ gh_pr_worktree() {
         git worktree remove ${GH_WORKTREE_NEW_BASE}/${GH_WORKTREE_NEW_PR}
     fi
 }
+
+git_list_unpushed_branches() {
+    # Fetch all remote branches
+    git fetch --all
+
+    # List local branches that are not pushed to the remote
+    for branch in $(git for-each-ref --format='%(refname:short)' refs/heads/); do
+        if ! git show-ref --quiet refs/remotes/origin/$branch; then
+            echo $branch
+        fi
+    done
+}
