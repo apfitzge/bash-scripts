@@ -107,6 +107,21 @@ git_worktree_new() {
     fi
 }
 
+# For all worktrees runt he provided command.
+git_worktree_for_all() {
+    GIT_WORKTREE_FOR_ALL_COMMAND=$@
+    GIT_WORKTREE_FOR_ALL_BASE=$(git_worktree_base)/worktrees
+
+    for d in ${GIT_WORKTREE_FOR_ALL_BASE}/*; do
+        if [ -d "$d" ]; then
+            cd $d
+            $GIT_WORKTREE_FOR_ALL_COMMAND
+            cd - > /dev/null
+        fi
+    done
+
+}
+
 # Open a new worktree for a PR number.
 gh_pr_worktree() {
     if [ -z "$1" ]; then echo "Usage: gh_worktree_new <PR_NUMBER>"; return -1; fi
