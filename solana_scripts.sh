@@ -60,7 +60,19 @@ sol_leader_slots() {
     local current_slot=$(solana -um slot)
     local leader_schedule=$(solana -um leader-schedule | grep "$1" | awk '{print $1}')
 
-    echo "$leader_schedule" | awk -v cs="$current_slot" '$1 <= cs'
+    echo "$leader_schedule" | awk -v cs="$current_slot" '
+        $1 <= cs {
+            diff = cs - $1
+            mins = int(((diff * 0.4) / 60))
+            printf "%s - ~%d min ago\n", $1, mins
+        }
+    '
     echo "Current slot: $current_slot"
-    echo "$leader_schedule" | awk -v cs="$current_slot" '$1 > cs'
+    echo "$leader_schedule" | awk -v cs="$current_slot" '
+        $1 > cs {
+            diff = $1 - cs
+            mins = int(((diff * 0.4) / 60))
+            printf "%s - ~%d min\n", $1, mins
+        }
+    '
 }
