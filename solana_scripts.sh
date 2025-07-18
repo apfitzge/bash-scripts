@@ -51,3 +51,16 @@ sol_feature_status() {
     echo "testnet: " $(solana -ut feature status $1 | head -n 2 | tail -n 1)
     echo "mainnet: " $(solana -um feature status $1 | head -n 2 | tail -n 1)
 }
+
+sol_leader_slots() {
+    if [ -z "$1" ]; then echo "Usage: sol_leader_slots <VOTE_PUBKEY>"; return -1; fi
+
+    # Get the current slot and the slots for that leader
+    # in the current epoch's leader schedule
+    local current_slot=$(solana -um slot)
+    local leader_schedule=$(solana -um leader-schedule | grep "$1" | awk '{print $1}')
+
+    echo "$leader_schedule" | awk -v cs="$current_slot" '$1 <= cs'
+    echo "Current slot: $current_slot"
+    echo "$leader_schedule" | awk -v cs="$current_slot" '$1 > cs'
+}
