@@ -43,3 +43,23 @@ criterion_load() {
         echo "No saved data found for $crate_name at commit $commit_hash"
     fi
 }
+
+workspace_crates() {
+    cargo tree --workspace --depth 0 --prefix none \
+        | sed -E 's/ v[0-9].*//'
+}
+
+for_each_crate() {
+    if [ "$#" -eq 0 ]; then
+        echo "usage: for_each_crate <command> [args...]" >&2
+        return 2
+    fi
+
+    local crate
+    workspace_crates | while IFS= read -r crate;
+        do [ -z "$crate" ] && continue
+
+        echo "==> $crate" >&2
+        "$@" "$crate" || return $?
+    done
+}
